@@ -1,0 +1,89 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>roundimg</title>
+<meta property="og:image" content="https://taisukef.github.io/roundimg/roundimg.jpg">
+<script type="module">
+
+import { waitDropFiles } from "https://js.sabae.cc/waitDropFiles.js";
+import { waitImageFileRead } from "https://js.sabae.cc/waitImageFileRead.js";
+
+window.onload = async () => {
+	const cropCircle = (img) => {
+		const w = img.width;
+		const h = img.height;
+		const canvas = document.createElement("canvas");
+		canvas.width = w;
+		canvas.height = h;
+		const g = canvas.getContext("2d");
+		g.beginPath();
+		const r = Math.min(w, h) / 2;
+		const ox = w / 2;
+		const oy = h / 2;
+		g.arc(ox, oy, r, 0, Math.PI * 2, false);
+		g.clip();
+		g.drawImage(img, 0, 0);
+		const data = canvas.toDataURL("image/png");
+//		const data = canvas.toDataURL("image/jpeg");
+//		debug(data);
+		const res = new Image();
+		res.src = data;
+		return res;
+	};
+
+	const convertFile = async (f) => {
+		try {
+			if (!f.type.match("image.*")) {
+				throw "画像ファイルではありません";
+			}
+			const img = await waitImageFileRead(f.file);
+			const img2 = cropCircle(img);
+			main.appendChild(img2);
+		} catch (e) {
+			main.innerHTML = "読み取り時にエラーが発生しました。<br>" + e;
+		}
+	};
+
+	for (;;) {
+		const files = await waitDropFiles(main);
+		for (const f of files) {
+			convertFile(f);
+		}
+	}
+};
+</script>
+<style>
+body {
+	text-align: center;
+}
+#main {
+	border: 2px solid black;
+	margin: 20px;
+	padding: 40px;
+	text-align: center;
+	color: gray;
+}
+#main img {
+	width: 100%;
+}
+#credit {
+	margin: 1.5em;
+}
+a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1>画像を丸く</h1>
+
+<div id="main">まるくしたい画像ファイルをドロップ！</div>
+
+ブラウザを使った簡単画像加工ツール。<br>
+File APIというものを使ってみました。お手軽でいい感じです。<br>
+
+<div id='credit'>
+APP: CC BY <a href=https://fukuno.jig.jp/3185>@taisukef</a> (<a href=https://taisukef.github.io/roundimg/>src on GitHub</a>)<br>
+</div></div>
+
+</body>
+</html>
